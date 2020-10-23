@@ -1,6 +1,6 @@
 {
   "name": "gh-action-conventional-commits",
-  "version": "7.0.5",
+  "version": "7.0.6",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/soamee/gh-action-bump-version.git"
