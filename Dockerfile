@@ -9,7 +9,7 @@ LABEL "com.github.actions.color"="blue"
 
 # Copy the package.json and package-lock.json
 COPY package*.json ./
-COPY npm install -g npm@7.0.3
+RUN npm install -g npm@7.0.3
 
 # Install dependencies
 RUN apt-get update
