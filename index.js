@@ -1,3 +1,4 @@
+// @ts-check
 const { Toolkit } = require("actions-toolkit");
 const { execSync } = require("child_process");
 
