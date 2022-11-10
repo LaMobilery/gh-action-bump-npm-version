@@ -29,15 +29,15 @@ Toolkit.run(async (tools) => {
 
   try {
     const current = pkg.version.toString();
-    await tools.runInWorkspace("git", [
+    await tools.exec("git", [
       "config",
       "user.name",
       '"Automated Version Bump"',
     ]);
-    await tools.runInWorkspace("git", [
+    await tools.exec("git", [
       "config",
       "user.email",
-      '"gh-action-bump-version@users.noreply.github.com"',
+      '"gh-action-bump-npm-version@users.noreply.github.com"',
     ]);
 
     const currentBranch = /refs\/[a-zA-Z]+\/(.*)/.exec(
@@ -47,7 +47,7 @@ Toolkit.run(async (tools) => {
 
     // do it in the current checked out github branch (DETACHED HEAD)
     // important for further usage of the package.json version
-    await tools.runInWorkspace("npm", [
+    await tools.exec("npm", [
       "version",
       "--allow-same-version=true",
       "--git-tag-version=false",
@@ -65,14 +65,12 @@ Toolkit.run(async (tools) => {
     )
       .toString()
       .trim();
-    await tools.runInWorkspace("git", ["commit", "-a", "--no-edit"]);
-
-    await tools.runInWorkspace("git", ["checkout", currentBranch]);
-    await tools.runInWorkspace("npm", [
-      "version",
-      "--allow-same-version=true",
-      "--git-tag-version=false",
-      current,
+    await tools.exec("git", [
+      "commit",
+      "-a",
+      "--amend",
+      "--no-edit",
+      "--no-verify",
     ]);
 
     console.log(
@@ -80,43 +78,17 @@ Toolkit.run(async (tools) => {
       current,
       "/",
       "version:",
-      versionSegmentToIncrement
+      versionSegmentToIncrement,
+      "new version:",
+      newVersion
     );
 
-    newVersion = execSync(
-      `npm version --git-tag-version=false ${versionSegmentToIncrement}`
-    )
-      .toString()
-      .trim();
-    console.log("new version:", newVersion);
-
-    try {
-      await tools.runInWorkspace("git", [
-        "commit",
-        "-a",
-        "-m",
-        `ci: ${commitMessage} ${newVersion}`,
-      ]);
-    } catch (e) {
-      console.warn(
-        'git commit failed because you are using "actions/checkout@v2"; ' +
-          'but that doesnt matter because you dont need that git commit, thats only for "actions/checkout@v1"'
-      );
-    }
-
     const remoteRepo = `https://${process.env.GITHUB_ACTOR}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
-    await tools.runInWorkspace("git", ["tag", newVersion]);
-    await tools.runInWorkspace("git", ["pull", remoteRepo, "--no-edit"]);
-    await tools.runInWorkspace("git", [
+    await tools.exec("git", ["tag", newVersion]);
+    await tools.exec("git", [
       "push",
       remoteRepo,
       "--follow-tags",
-      "--no-verify",
-    ]);
-    await tools.runInWorkspace("git", [
-      "push",
-      remoteRepo,
-      "--tags",
       "--no-verify",
     ]);
   } catch (e) {
@@ -127,6 +99,9 @@ Toolkit.run(async (tools) => {
   tools.exit.success("Version bumped!");
 });
 
+/**
+ * @param {string[]} messages
+ */
 function getVersionSegmentToIncrement(messages) {
   if (
     messages
