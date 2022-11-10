@@ -89,6 +89,7 @@ Toolkit.run(async (tools) => {
       "push",
       remoteRepo,
       "--follow-tags",
+      "--force-with-lease",
       "--no-verify",
     ]);
   } catch (e) {
