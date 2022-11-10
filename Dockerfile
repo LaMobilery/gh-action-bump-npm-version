@@ -1,4 +1,4 @@
-FROM node:slim
+FROM node:18-slim
 # Labels for GitHub to read your action
 LABEL "com.github.actions.name"="Automated version bump for npm packages."
 LABEL "com.github.actions.description"="Automated version bump for npm packages."
@@ -9,7 +9,6 @@ LABEL "com.github.actions.color"="blue"
 
 # Copy the package.json and package-lock.json
 COPY package*.json ./
-RUN npm install -g npm@7.0.3
 
 # Install dependencies
 RUN apt-get update
